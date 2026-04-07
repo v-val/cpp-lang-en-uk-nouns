@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 project(lang-en-uk-nouns
 		LANGUAGES CXX
-		VERSION 0.2.2
+		VERSION 0.2.3
 		DESCRIPTION "Link C++ vs UK English nouns"
 		HOMEPAGE_URL "github.com/v-val/lang-en-uk-nouns"
 		)
@@ -45,6 +45,7 @@ if (NOT EXISTS "${LANG_EN_UK_NOUNS_SOURCE_FILE_}")
 	endif()
 endif()
 if (LINUX)
+	set(LANG_EN_UK_NOUNS_WITH_OBJCOPY ON)
 	add_custom_command(
 			OUTPUT ${LANG_EN_UK_NOUNS_OBJECT_FILE_}
 			WORKING_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_GENERATE_DIR_}
@@ -111,6 +112,9 @@ elseif (CPP_LANG_EN_UK_NOUNS_BUILD_STATIC)
 	add_library(${LANG_EN_UK_NOUNS_LIBRARY}::static ALIAS ${LANG_EN_UK_NOUNS_LIBRARY})
 endif (CPP_LANG_EN_UK_NOUNS_BUILD_SHARED)
 if (TARGET ${LANG_EN_UK_NOUNS_LIBRARY})
+	if (LANG_EN_UK_NOUNS_WITH_OBJCOPY)
+		target_compile_definitions(${LANG_EN_UK_NOUNS_LIBRARY} PUBLIC LANG_EN_UK_NOUNS_WITH_OBJCOPY)
+	endif (LANG_EN_UK_NOUNS_WITH_OBJCOPY)
 	target_link_libraries(${LANG_EN_UK_NOUNS_LIBRARY} PRIVATE ${LANG_EN_UK_NOUNS_TXT_LIBRARY})
 	target_compile_features(${LANG_EN_UK_NOUNS_LIBRARY} PRIVATE cxx_std_17)
 	target_include_directories(${LANG_EN_UK_NOUNS_LIBRARY}

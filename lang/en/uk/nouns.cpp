@@ -7,10 +7,17 @@
 
 
 extern "C" {
-    extern const char* _binary_lang_en_uk_nouns_txt_start;
-    extern const char* _binary_lang_en_uk_nouns_txt_end;
-    extern unsigned int _binary_lang_en_uk_nouns_txt_size;
-}
+#ifdef LANG_EN_UK_NOUNS_WITH_OBJCOPY
+extern const char _binary_lang_en_uk_nouns_txt_start[];
+extern const char _binary_lang_en_uk_nouns_txt_end[];
+extern const char _binary_lang_en_uk_nouns_txt_size[];
+#else
+extern const char* _binary_lang_en_uk_nouns_txt_start;
+extern const char* _binary_lang_en_uk_nouns_txt_end;
+extern unsigned int _binary_lang_en_uk_nouns_txt_size;
+#endif
+} // extern "C"
+
 
 namespace lang::en::uk {
 
