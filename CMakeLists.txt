@@ -1,0 +1,99 @@
+cmake_minimum_required(VERSION 3.18)
+
+project(lang-en-uk-nouns
+		LANGUAGES CXX
+		VERSION 0.1
+		DESCRIPTION "Link C++ vs UK English nouns"
+		HOMEPAGE_URL "github.com/v-val/lang-en-uk-nouns"
+		)
+
+set(CMAKE_CXX_STANDARD 17)
+#
+# British English nouns
+#
+set(LANG_EN_UK_NOUNS_LIBRARY "lang-en-uk-nouns")
+# Remote source
+set(LANG_EN_UK_NOUNS_TXT_URL
+		"https://gist.githubusercontent.com/trag1c/f74b2ab3589bc4ce5706f934616f6195/raw/5aa7de70fc83664017cb97dd02cbf6dc76b9e4a3/nouns.txt"
+)
+# Download to
+set(LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_ "${PROJECT_BINARY_DIR}/_${LANG_EN_UK_NOUNS_LIBRARY}")
+set(LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_ "${LANG_EN_UK_NOUNS_LIBRARY}.txt")
+set(LANG_EN_UK_NOUNS_SOURCE_FILE_ "${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_}/${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_}")
+# Build result
+set(LANG_EN_UK_NOUNS_OBJECT_FILE_NAME_ "${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_}.o")
+set(LANG_EN_UK_NOUNS_OBJECT_FILE_ "${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_}/${LANG_EN_UK_NOUNS_OBJECT_FILE_NAME_}")
+set_source_files_properties("${LANG_EN_UK_NOUNS_OBJECT_FILE_}" PROPERTIES EXTERNAL_OBJECT true GENERATED true)
+# Go
+# Only download if not already cached; avoids blocking every re-configure
+if (NOT EXISTS "${LANG_EN_UK_NOUNS_SOURCE_FILE_}")
+	message(STATUS "Download ${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_}...")
+	file(DOWNLOAD
+			"${LANG_EN_UK_NOUNS_TXT_URL}"
+			"${LANG_EN_UK_NOUNS_SOURCE_FILE_}"
+			STATUS     LANG_EN_UK_NOUNS_DOWNLOAD_STATUS_
+			EXPECTED_HASH SHA256=2cf171ac3188442b2fe0324773ba898fd818942cc9bc2c15cde64ea46a970e8a
+			#				SHOW_PROGRESS
+	)
+	list(GET LANG_EN_UK_NOUNS_DOWNLOAD_STATUS_ 0 LANG_EN_UK_NOUNS_DOWNLOAD_CODE_)
+	if (NOT LANG_EN_UK_NOUNS_DOWNLOAD_CODE_ EQUAL 0)
+		list(GET LANG_EN_UK_NOUNS_DOWNLOAD_STATUS_ 1 LANG_EN_UK_NOUNS_DOWNLOAD_MSG_)
+		file(REMOVE "${LANG_EN_UK_NOUNS_SOURCE_FILE_}")   # purge partial download
+		message(FATAL_ERROR
+				"Failed to download ${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_}: "
+				"${LANG_EN_UK_NOUNS_DOWNLOAD_MSG_} (code ${LANG_EN_UK_NOUNS_DOWNLOAD_CODE_})"
+		)
+	endif()
+endif()
+if (LINUX)
+	add_custom_command(
+			OUTPUT ${LANG_EN_UK_NOUNS_OBJECT_FILE_}
+			WORKING_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_}
+			COMMAND ${CMAKE_OBJCOPY}
+			ARGS -I binary -O elf64-x86-64 -B i386 ${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_} ${LANG_EN_UK_NOUNS_OBJECT_FILE_NAME_}
+			DEPENDS ${LANG_EN_UK_NOUNS_SOURCE_FILE_}
+			COMMENT "Objectify ${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_}"
+	)
+	# Bridge: gives the custom command a named target so the dependency
+	# graph is complete and parallel builds cannot race.
+	set(LANG_EN_UK_NOUNS_OBJECT_FILE_TARGET_ "${LANG_EN_UK_NOUNS_LIBRARY}-generate")
+	add_custom_target(${LANG_EN_UK_NOUNS_OBJECT_FILE_TARGET_} DEPENDS ${LANG_EN_UK_NOUNS_OBJECT_FILE_})
+	add_library(${LANG_EN_UK_NOUNS_LIBRARY} OBJECT IMPORTED GLOBAL)
+	set_target_properties(${LANG_EN_UK_NOUNS_LIBRARY} PROPERTIES IMPORTED_OBJECTS "${LANG_EN_UK_NOUNS_OBJECT_FILE_}")
+	# IMPORTED target now orders after the generation step (CMake ≥ 3.8)
+	add_dependencies(${LANG_EN_UK_NOUNS_LIBRARY} ${LANG_EN_UK_NOUNS_OBJECT_FILE_TARGET_})
+elseif (APPLE)
+	set(LANG_EN_UK_NOUNS_CXX_DATA_FILE_NAME_ "${LANG_EN_UK_NOUNS_LIBRARY}.cpp")
+	set(LANG_EN_UK_NOUNS_CXX_DATA_FILE_ "${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_}/${LANG_EN_UK_NOUNS_CXX_DATA_FILE_NAME_}")
+	string(TOLOWER "_binary_${LANG_EN_UK_NOUNS_SOURCE_FILE_NAME_}" OBJCOPY_SYMBOL_)
+	string(REGEX REPLACE "[^a-zA-Z]+" "_" OBJCOPY_SYMBOL_ "${OBJCOPY_SYMBOL_}")
+	string(TOUPPER "${OBJCOPY_SYMBOL_}" XXD_SYMBOL_DATA)
+	string(TOUPPER "${XXD_SYMBOL_DATA}_LEN" XXD_SYMBOL_LEN)
+	find_program(XXD_EXECUTABLE xxd REQUIRED)
+	#		file(MAKE_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_})
+	add_custom_command(
+			OUTPUT ${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}
+			WORKING_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_}
+			COMMAND ${XXD_EXECUTABLE} -C -n "${XXD_SYMBOL_DATA}" -i ${LANG_EN_UK_NOUNS_SOURCE_FILE_} ${LANG_EN_UK_NOUNS_CXX_DATA_FILE_NAME_}
+			COMMAND bash -Eeuo pipefail -c "
+				echo >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo // >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo // >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo // >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo 'extern \"C\" {' >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo 'const char* ${OBJCOPY_SYMBOL_}_start = reinterpret_cast<char*>(${XXD_SYMBOL_DATA});' >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo 'unsigned int ${OBJCOPY_SYMBOL_}_size = ${XXD_SYMBOL_LEN};' >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo 'const char* ${OBJCOPY_SYMBOL_}_end = ${OBJCOPY_SYMBOL_}_start + ${OBJCOPY_SYMBOL_}_size;' >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo // >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+				; echo '} // extern \"C\"' >> '${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}'
+			"
+			DEPENDS ${LANG_EN_UK_NOUNS_SOURCE_FILE_}
+			COMMENT "Convert ${LANG_EN_UK_NOUNS_SOURCE_FILE_} to CXX"
+			VERBATIM
+	)
+	#		message(WARNING "add_library(${LANG_EN_UK_NOUNS_LIBRARY} OBJECT ${LANG_EN_UK_NOUNS_CXX_DATA_FILE_})")
+	add_library(${LANG_EN_UK_NOUNS_LIBRARY} OBJECT ${LANG_EN_UK_NOUNS_CXX_DATA_FILE_})
+	#				message(FATAL_ERROR "Not yet")
+else ()
+	message(FATAL_ERROR "OS not supported. Sorry 😕")
+endif ()
