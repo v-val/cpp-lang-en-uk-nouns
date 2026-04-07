@@ -6,8 +6,6 @@ project(lang-en-uk-nouns
 		DESCRIPTION "Link C++ vs UK English nouns"
 		HOMEPAGE_URL "github.com/v-val/lang-en-uk-nouns"
 		)
-
-set(CMAKE_CXX_STANDARD 17)
 #
 # British English nouns
 #
@@ -70,7 +68,7 @@ elseif (APPLE)
 	string(TOUPPER "${OBJCOPY_SYMBOL_}" XXD_SYMBOL_DATA)
 	string(TOUPPER "${XXD_SYMBOL_DATA}_LEN" XXD_SYMBOL_LEN)
 	find_program(XXD_EXECUTABLE xxd REQUIRED)
-	#		file(MAKE_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_})
+	file(MAKE_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_})
 	add_custom_command(
 			OUTPUT ${LANG_EN_UK_NOUNS_CXX_DATA_FILE_}
 			WORKING_DIRECTORY ${LANG_EN_UK_NOUNS_LIBRARY_BUILD_DIR_}
