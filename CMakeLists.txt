@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.23)
 
 project(lang-en-uk-nouns
 		LANGUAGES CXX
-		VERSION 0.2.3
+		VERSION 0.2.4
 		DESCRIPTION "Link C++ vs UK English nouns"
-		HOMEPAGE_URL "github.com/v-val/lang-en-uk-nouns"
+		HOMEPAGE_URL "github.com/v-val/cpp-lang-en-uk-nouns"
 		)
 #
 # British English nouns
@@ -99,18 +99,18 @@ else ()
 endif ()
 
 
-option(CPP_LANG_EN_UK_NOUNS_BUILD_SHARED "Build the shared `lang-en-uk-nouns` library target" ON)
-option(CPP_LANG_EN_UK_NOUNS_BUILD_STATIC "Build the static `lang-en-uk-nouns` library target" OFF)
+option(LANG_EN_UK_NOUNS_BUILD_SHARED "Build the shared `lang-en-uk-nouns` library target" ON)
+option(LANG_EN_UK_NOUNS_BUILD_STATIC "Build the static `lang-en-uk-nouns` library target" OFF)
 set(LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL "lang/en/uk")
 file(GLOB LANG_EN_UK_NOUNS_LIBRARY_SOURCES ${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}/*.cpp)
 file(GLOB LANG_EN_UK_NOUNS_LIBRARY_HEADERS ${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}/*.hpp)
-if (CPP_LANG_EN_UK_NOUNS_BUILD_SHARED)
+if (LANG_EN_UK_NOUNS_BUILD_SHARED)
 	add_library(${LANG_EN_UK_NOUNS_LIBRARY} SHARED ${LANG_EN_UK_NOUNS_LIBRARY_SOURCES})
 	add_library(${LANG_EN_UK_NOUNS_LIBRARY}::shared ALIAS ${LANG_EN_UK_NOUNS_LIBRARY})
-elseif (CPP_LANG_EN_UK_NOUNS_BUILD_STATIC)
+elseif (LANG_EN_UK_NOUNS_BUILD_STATIC)
 	add_library(${LANG_EN_UK_NOUNS_LIBRARY} STATIC ${LANG_EN_UK_NOUNS_LIBRARY_SOURCES})
 	add_library(${LANG_EN_UK_NOUNS_LIBRARY}::static ALIAS ${LANG_EN_UK_NOUNS_LIBRARY})
-endif (CPP_LANG_EN_UK_NOUNS_BUILD_SHARED)
+endif (LANG_EN_UK_NOUNS_BUILD_SHARED)
 if (TARGET ${LANG_EN_UK_NOUNS_LIBRARY})
 	if (LANG_EN_UK_NOUNS_WITH_OBJCOPY)
 		target_compile_definitions(${LANG_EN_UK_NOUNS_LIBRARY} PUBLIC LANG_EN_UK_NOUNS_WITH_OBJCOPY)
