@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.23)
 
 project(lang-en-uk-nouns
 		LANGUAGES CXX
-		VERSION 0.1.1
+		VERSION 0.2.1
 		DESCRIPTION "Link C++ vs UK English nouns"
 		HOMEPAGE_URL "github.com/v-val/lang-en-uk-nouns"
 		)
@@ -97,4 +97,33 @@ else ()
 	message(FATAL_ERROR "OS not supported. Sorry 😕")
 endif ()
 
+
+option(CPP_LANG_EN_UK_NOUNS_BUILD_SHARED "Build the shared `lang-en-uk-nouns` library target" ON)
+option(CPP_LANG_EN_UK_NOUNS_BUILD_STATIC "Build the static `lang-en-uk-nouns` library target" OFF)
+set(LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL "lang/en/uk")
+file(GLOB LANG_EN_UK_NOUNS_LIBRARY_SOURCES ${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}/*.cpp)
+file(GLOB LANG_EN_UK_NOUNS_LIBRARY_HEADERS ${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}/*.hpp)
+if (CPP_LANG_EN_UK_NOUNS_BUILD_SHARED)
+	add_library(${LANG_EN_UK_NOUNS_LIBRARY} SHARED ${LANG_EN_UK_NOUNS_LIBRARY_SOURCES})
+	add_library(${LANG_EN_UK_NOUNS_LIBRARY}::shared)
+elseif (CPP_LANG_EN_UK_NOUNS_BUILD_STATIC)
+	add_library(${LANG_EN_UK_NOUNS_LIBRARY} STATIC ${LANG_EN_UK_NOUNS_LIBRARY_SOURCES})
+	add_library(${LANG_EN_UK_NOUNS_LIBRARY}::static)
+endif (CPP_LANG_EN_UK_NOUNS_BUILD_SHARED)
+if (TARGET ${LANG_EN_UK_NOUNS_LIBRARY})
+	target_link_libraries(${LANG_EN_UK_NOUNS_LIBRARY} PRIVATE ${LANG_EN_UK_NOUNS_TXT_LIBRARY})
+	target_compile_features(${LANG_EN_UK_NOUNS_LIBRARY} PRIVATE cxx_std_17)
+	target_include_directories(${LANG_EN_UK_NOUNS_LIBRARY}
+			PUBLIC
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}>
+			$<INSTALL_INTERFACE:include/${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}>
+	)
+	target_sources(${LANG_EN_UK_NOUNS_LIBRARY}
+			PUBLIC
+			FILE_SET HEADERS
+			BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+			FILES
+			"${LANG_EN_UK_NOUNS_CPP_SOURCE_DIR_REL}/nouns.hpp"
+	)
+endif ()
 
